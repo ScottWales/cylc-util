@@ -5,7 +5,7 @@ python:
     - '3.5'
 install:
     - pip install --upgrade pytest coverage codecov
-    - pip install -r requirements.txt
+    - pip install .
 script:
     - coverage run --source cylcutil -m py.test
 after_success:
