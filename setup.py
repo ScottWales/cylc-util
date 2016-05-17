@@ -24,7 +24,7 @@ def git_describe():
     stdout, stderr  = proc.communicate()
     if proc.returncode != 0:
         raise Exception('git error: %s'%stderr)
-    desc    = stdout[0].decode('utf-8').strip()
+    desc    = stdout.decode('utf-8').strip()
     try:
         ihash   = desc.rindex('-')
     except ValueError:
@@ -51,6 +51,12 @@ setup(
         url              = 'https://github.com/ScottWales/cylcutil',
         packages         = find_packages(exclude=['tests*']),
         install_requires = requirements,
+
+        entry_points     = {
+            'console_scripts': [
+                'cylc-port = cylcutil.port:main'
+                ],
+            },
 
         author           = 'Scott Wales',
         author_email     = 'scott.wales@unimelb.edu.au',
