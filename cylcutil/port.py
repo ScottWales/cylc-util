@@ -21,6 +21,8 @@ import os
 import re
 import socket
 
+# Matches Cylc sections - arbitrary text within multiple square brackets
+#  '[[ example ]]' -> '[[', 'example'
 section_re = re.compile('^\s*(\[+)\s*([^]]+)\s*\]+\s*$')
 
 def make_portable(old, new, site):
@@ -33,9 +35,12 @@ def make_portable(old, new, site):
     for line in old:
         section_match = section_re.match(line)
         if section_match:
-            # Get the current section
+            # Get the current section level from the number of brackets
             level = len(section_match.group(1))
-            name  = section_match.group(2)
+            name = section_match.group(2)
+
+            # Insert the section, then trim sections in case we've gone up a
+            # level
             section.insert(level-1, name)
             section = section[0:level]
 
@@ -48,6 +53,8 @@ def make_portable(old, new, site):
                 site.write(line)
             else:
                 new.write(line)
+
+    # Include the site file
     new.write('{% include "site/"+SITE+".rc" %}\n')
 
 def main():
@@ -64,27 +71,29 @@ def main():
     parser.add_argument('suite',
             help='Path to Cylc suite')
     parser.add_argument('--site',
-            help='Site name to create',
-            default=socket.getfqdn())
+            help='Site name to create')
     args = parser.parse_args()
 
     # Get the suite.rc file
     oldsuiterc_name = os.path.join(args.suite,'suite.rc')
-    oldsuiterc      = open(oldsuiterc_name,'r')
-
     newsuiterc_name = os.path.join(args.suite,'suite.rc.new')
-    newsuiterc      = open(newsuiterc_name,'w')
 
     # Get the site/$SITE.rc file
     site_path    = os.path.join(args.suite, 'site')
-    if not os.path.isdir(site_path):
-        os.mkdir(site_path)
     siterc_name  = os.path.join(site_path, '%s.rc'%args.site)
+
+    # Sanity checks
+    if not os.path.isdir(site_path):
+        os.mkdir(site_path) 
     if os.path.isfile(siterc_name):
         raise ValueError('Site file already exists: %s'%siterc_name)
-    siterc       = open(siterc_name,'w')
+
+    oldsuiterc = open(oldsuiterc_name,'r')
+    newsuiterc = open(newsuiterc_name,'w')
+    siterc     = open(siterc_name,'w')
 
     make_portable(oldsuiterc, newsuiterc, siterc)
+
     oldsuiterc.close()
     newsuiterc.close()
     siterc.close()
