@@ -15,7 +15,7 @@
 # limitations under the License.
 from __future__ import print_function
 
-from StringIO import StringIO
+from six import StringIO
 from textwrap import dedent
 from cylcutil.port import *
 
