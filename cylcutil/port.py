@@ -23,7 +23,10 @@ import socket
 
 # Matches Cylc sections - arbitrary text within multiple square brackets
 #  '[[ example ]]' -> '[[', 'example'
-section_re = re.compile('^\s*(\[+)\s*([^]]+)\s*\]+\s*$')
+section_re = re.compile('^\s*(\[+)\s*([^]]+\w)\s*\]+\s*$')
+
+# Matches Cylc items - 'key = value' -> 'key'
+key_re = re.compile('^\s*(\w+)\s*=.*$')
 
 def make_portable(old, new, site):
     """
@@ -41,8 +44,10 @@ def make_portable(old, new, site):
 
             # Insert the section, then trim sections in case we've gone up a
             # level
-            section.insert(level-1, name)
-            section = section[0:level]
+            newsect = ['']*level
+            newsect[0:len(section)] = section
+            newsect[level-1] = name
+            section = newsect
 
             # Both files get sections
             new.write(line)
@@ -50,6 +55,19 @@ def make_portable(old, new, site):
         else:
             if len(section) > 2 and section[2] == 'directives':
                 # Directives are always non-portable
+                site.write(line)
+                continue
+
+            # Is this a key=value line?
+            key_match = key_re.match(line)
+            if key_match:
+                key = key_match.group(1)
+            else:
+                key = None
+
+            if len(section) > 2 and section[2] == 'job submission' and key == 'method':
+                site.write(line)
+            elif len(section) > 2 and section[2] == 'remote' and key == 'host':
                 site.write(line)
             else:
                 new.write(line)

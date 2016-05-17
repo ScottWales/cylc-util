@@ -42,6 +42,12 @@ def test_section():
     assert section_match.group(1) == '['
     assert section_match.group(2) == 'abc'
 
+    line = '[[[ job submission ]]]'
+    section_match = section_re.match(line)
+    assert section_match
+    assert section_match.group(1) == '[[['
+    assert section_match.group(2) == 'job submission'
+
 def test_directives():
     old = """
         [[fcm_make2_um]]
@@ -73,3 +79,25 @@ def test_directives():
         """
     check_port(old, new, site)
 
+def test_method():
+    old = """
+        [[LINUX_UM]]
+            [[[job submission]]]
+                method = at
+            [[[remote]]]
+                host = $(rose host-select {{ EXTRACT_HOST }})
+        """
+    new = """
+        [[LINUX_UM]]
+            [[[job submission]]]
+            [[[remote]]]
+        {% include "site/"+SITE+".rc" %}
+        """
+    site = """
+        [[LINUX_UM]]
+            [[[job submission]]]
+                method = at
+            [[[remote]]]
+                host = $(rose host-select {{ EXTRACT_HOST }})
+        """
+    check_port(old, new, site)
