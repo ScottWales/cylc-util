@@ -10,7 +10,14 @@
 Build Instructions:
 -------------------
 
-    mkdir build && pushd build
-    cmake ..
-    make
-    ctest
+    pip install --user git+https://github.com/ScottWales/cylc-util
+    # Ensure ~/.local/bin is on your PATH
+
+Available Tools
+---------------
+
+### cylc-port
+
+Make a suite more portable, by moving site specific details to the 'site' directory
+
+    cylc-port --site NCI ~/cylc-run/mysuite
