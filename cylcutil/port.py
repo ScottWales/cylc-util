@@ -48,7 +48,7 @@ def make_portable(old, new, site):
                 site.write(line)
             else:
                 new.write(line)
-    new.write('{% include "site/"+SITE+".rc" %}')
+    new.write('{% include "site/"+SITE+".rc" %}\n')
 
 def main():
     """

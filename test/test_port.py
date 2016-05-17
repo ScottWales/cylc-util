@@ -61,6 +61,7 @@ def test_directives():
                 UM_INSTALL_DIR = /projects/um1
                 ROSE_TASK_N_JOBS = 6
             [[[directives]]]
+        {% include "site/"+SITE+".rc" %}
         """
     site = """
         [[fcm_make2_um]]
