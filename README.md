@@ -21,3 +21,33 @@ Available Tools
 Make a suite more portable, by moving site specific details to the 'site' directory
 
     cylc-port --site NCI ~/cylc-run/mysuite
+
+This will create a new file `~/cylc-run/mysuite/site/NCI.rc`, which contains
+all of the site-specific runtime information (submission method, directives and
+host). A new `suite.rc` file will be created as `suite.rc.new`, which has the
+site specific information removed. The new suite file will include the site
+file named by the Jinja variable `SITE`, eg. `{% set SITE='NCI' %}` will
+include `site/NCI.rc`.
+
+To port the suite to a new site make a copy of an existing site file and change
+task directives as appropriate.
+
+#### Limitations
+
+Currently Jinja macros within the main suite.rc file are ignored, and section
+contents are copied until the next section name. This means a suite file like
+
+```
+{% for foo in ['bar','baz'] %}
+    [[ {{ foo }} ]]
+        [[[ directives ]]]
+            -ncpus = 14
+{% endfor %}
+
+    [[ other ]]
+        ...
+```
+
+everything from the `[[[ directives ]]]` to the `[[ other ]]` line are moved to
+the site file, including the Jinja tag. Some manual cleanup will be required in
+this case.
